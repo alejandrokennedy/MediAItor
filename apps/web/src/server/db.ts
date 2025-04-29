@@ -18,7 +18,7 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 // Initialize Prisma client only once and reuse it across requests
-const getDb = () => {
+export const getDb = () => {
   // Check if we already have a Prisma client instance
   if (!globalForPrisma.prisma) {
     // Create a new client if none exists
@@ -33,7 +33,7 @@ const getDb = () => {
   return globalForPrisma.prisma;
 };
 
-// Export the db client
+// Export the db client for backward compatibility
 export const db = getDb();
 
 // // OLD CODE
