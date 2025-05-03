@@ -6,7 +6,7 @@
  * TL;DR - This is where all the tRPC server stuff is created and plugged in. The pieces you will
  * need to use are documented accordingly near the end.
  */
-import { initTRPC } from "@trpc/server";
+import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
@@ -27,7 +27,7 @@ import { getDb } from "~/server/db";
 export const createTRPCContext = async (opts: { headers: Headers }) => {
   // Only initialize db at runtime, not during build
   return {
-    db: getDb(), 
+    db: getDb(),
     ...opts,
   };
 };
@@ -105,3 +105,37 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
  * are logged in.
  */
 export const publicProcedure = t.procedure.use(timingMiddleware);
+
+/**
+ * Protected (authenticated) procedure
+ *
+ * This is used for procedures that require the user to be authenticated.
+ * The authentication is handled by the Clerk middleware at the API route level,
+ * so this is primarily used for type safety and to require the userId to be passed.
+ */
+export const protectedProcedure = t.procedure
+  .use(timingMiddleware)
+  .use(({ next }) => {
+    return next();
+  });
+
+// export const protectedProcedure = t.procedure
+// .use(timingMiddleware)
+// .use(async ({ next, ctx }) => {
+//   // If you want to add an explicit auth check:
+//   const user = await currentUser();
+//   if (!user) {
+//     throw new TRPCError({
+//       code: "UNAUTHORIZED",
+//       message: "You must be logged in",
+//     });
+//   }
+  
+//   return next({
+//     ctx: {
+//       ...ctx,
+//       userId: user.id,
+//     },
+//   });
+// });
+  

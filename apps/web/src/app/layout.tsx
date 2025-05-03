@@ -3,6 +3,7 @@ import { ClerkProvider, SignInButton, SignUpButton, SignedIn, SignedOut, UserBut
 import { type Metadata } from "next";
 import { Geist, Geist_Mono } from 'next/font/google'
 import { TRPCReactProvider } from "~/trpc/react";
+import { UserSync } from "./_components/UserSync";
 
 export const metadata: Metadata = {
   title: "MediAItor",
@@ -38,6 +39,7 @@ export default function RootLayout({
                 <UserButton />
               </SignedIn>
             </header>
+            <UserSync />
             {children}
           </TRPCReactProvider>
         </ClerkProvider>
