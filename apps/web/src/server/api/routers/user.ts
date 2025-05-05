@@ -1,6 +1,6 @@
 import { TRPCError } from '@trpc/server'
 import { currentUser } from '@clerk/nextjs/server';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '../../../generated/client';
 
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
 
@@ -22,7 +22,7 @@ export const userRouter = createTRPCRouter({
       // Basic implementation to check if user exists
       const existingUser = await ctx.db.user.findUnique({
         where: { clerkId }
-      })
+      });
       
       // If user already exists, return info
       if (existingUser) {
@@ -57,7 +57,7 @@ export const userRouter = createTRPCRouter({
         data: {
           clerkId,
           email: emailObject.emailAddress,
-          name: fullName || null,  // Use null if name is empty
+          name: fullName || null,  
         },
       });
       

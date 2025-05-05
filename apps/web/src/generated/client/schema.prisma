@@ -1,0 +1,83 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String               @id @default(uuid())
+  email       String               @unique
+  name        String?
+  clerkId     String               @unique // Clerk user ID
+  sessions    SessionParticipant[]
+  messages    Message[]
+  reflections Reflection[]
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+}
+
+model Session {
+  id               String               @id @default(uuid())
+  title            String?
+  isSolo           Boolean              @default(false)
+  parentSession    Session?             @relation("ParentChildSessions", fields: [parentSessionId], references: [id])
+  parentSessionId  String?
+  breakoutSessions Session[]            @relation("ParentChildSessions")
+  stage            SessionStage         @default(MAIN)
+  participants     SessionParticipant[]
+  messages         Message[]
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+}
+
+model SessionParticipant {
+  id        String            @id @default(uuid())
+  session   Session           @relation(fields: [sessionId], references: [id])
+  sessionId String
+  user      User              @relation(fields: [userId], references: [id])
+  userId    String
+  joinedAt  DateTime          @default(now())
+  status    ParticipantStatus @default(ACTIVE)
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  session   Session  @relation(fields: [sessionId], references: [id])
+  sessionId String
+  user      User?    @relation(fields: [userId], references: [id])
+  userId    String?
+  content   String
+  isAI      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Reflection {
+  id        String   @id @default(uuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  content   String
+  createdAt DateTime @default(now())
+}
+
+// ENUMS
+
+enum SessionStage {
+  MAIN
+  BREAKOUT
+  REFLECTION
+  PAUSED
+}
+
+enum ParticipantStatus {
+  ACTIVE
+  WAITING
+  IN_BREAKOUT
+  LEFT
+}
