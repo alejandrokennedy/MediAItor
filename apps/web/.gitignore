@@ -44,3 +44,6 @@ yarn-error.log*
 
 # idea files
 .idea
+
+# Prisma generated client (custom location)
+/src/generated/
