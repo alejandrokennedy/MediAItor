@@ -1,6 +1,6 @@
 import { TRPCError } from '@trpc/server'
 import { currentUser } from '@clerk/nextjs/server';
-import { Prisma } from '../../../generated/client';
+import { Prisma } from '@prisma/client';
 
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
 
