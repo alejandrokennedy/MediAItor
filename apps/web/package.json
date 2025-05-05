@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "prebuild": "prisma generate --schema=prisma/schema.prisma && node ./scripts/print-env.js",
+    "prebuild": "prisma generate && node ./scripts/print-env.js",
     "build": "next build",
     "check": "next lint && tsc --noEmit",
     "db:generate": "prisma migrate dev",
@@ -14,7 +14,7 @@
     "dev": "next dev --turbo",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",
     "format:write": "prettier --write \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",
-    "postinstall": "prisma generate --schema=prisma/schema.prisma",
+    "postinstall": "prisma generate",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "preview": "next build && next start",
