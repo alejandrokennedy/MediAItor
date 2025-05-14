@@ -1,20 +1,33 @@
+/*
+
+- check whether user is logged in
+  - import user checking logic
+  - conditionally show session creation button
+
+*/
+
 // import Link from "next/link";
 // import { api, HydrateClient } from "~/trpc/server";
 
 import { HydrateClient } from "~/trpc/server";
+import { api } from "~/trpc/server"
+import CreateSessionButton from "./_components/CreateSessionButton";
 
 export default async function Home() {
   // const hello = await api.post.hello({ text: "from tRPC" });
 
-  return (
-    <HydrateClient>
-      <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c] text-white">
-        <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
-          <h1 className="text-5xl font-extrabold tracking-tight sm:text-[5rem]">
-            Medi <span className="text-[hsl(280,100%,70%)]">AI</span> tor
-          </h1>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-8">
-            {/* <Link
+  try {
+    const user = await api.user.getCurrentUser();
+
+    return (
+      <HydrateClient>
+        <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c] text-white">
+          <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
+            <h1 className="text-5xl font-extrabold tracking-tight sm:text-[5rem]">
+              Medi <span className="text-[hsl(280,100%,70%)]">AI</span> tor
+            </h1>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-8">
+              {/* <Link
               className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 hover:bg-white/20"
               href="https://create.t3.gg/en/usage/first-steps"
               target="_blank"
@@ -36,15 +49,38 @@ export default async function Home() {
                 to deploy it.
               </div>
             </Link> */}
+            </div>
+            <div className="flex flex-col items-center gap-2">
+              {user ? (
+                <>
+                  <p className="text-2xl text-white">Welcome, {user.name}</p>
+                  <CreateSessionButton />
+                </>
+              ) : (
+                <p>Log in...</p>
+              )}
+            </div>
           </div>
-          <div className="flex flex-col items-center gap-2">
-            <p className="text-2xl text-white">
-              {/* {hello ? hello.greeting : "Loading tRPC query..."} */}
-              Coming soon...
-            </p>
+        </main>
+      </HydrateClient>
+    );
+  } catch (error) {
+    console.log("Error fetching user:", error);
+
+    return (
+      <HydrateClient>
+        <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c] text-white">
+          <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
+            <h1 className="text-5xl font-extrabold tracking-tight sm:text-[5rem]">
+              Medi <span className="text-[hsl(280,100%,70%)]">AI</span> tor
+            </h1>
+            <div className="flex flex-col items-center gap-4">
+              <p className="text-xl text-white">Sorry, we encountered an error</p>
+              <p className="text-md text-white/70">Please try refreshing the page</p>
+            </div>
           </div>
-        </div>
-      </main>
-    </HydrateClient>
-  );
+        </main>
+      </HydrateClient>
+    )
+  }
 }
