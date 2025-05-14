@@ -1,11 +1,13 @@
 import { api } from "~/trpc/server"
-// import type { Session } from "@prisma/client" // Add type import
 
-export default async function SessionPage({ params }: { params: { sessionId: string }}) {
+type Params = Promise<{ sessionId: string }>
+
+export default async function SessionPage({ params }: { params: Params}) {
   try {
-    // The server-side API returns the data directly, not wrapped in a data property
+    const { sessionId } = await params
+    
     const session = await api.session.getSession({
-      sessionId: params.sessionId
+      sessionId
     });
 
     console.log("session", session)
