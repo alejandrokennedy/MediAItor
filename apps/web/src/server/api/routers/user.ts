@@ -10,14 +10,14 @@ export const userRouter = createTRPCRouter({
       // Get the current user from Clerk
       const user = await currentUser()
 
-      if (!user) {
+      const clerkId = user?.id;
+
+      if (!clerkId) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
-          message: "Not authenticated",
+          message: "User ID not found",
         });
       }
-
-      const clerkId = user.id;
       
       // Basic implementation to check if user exists
       const existingUser = await ctx.db.user.findUnique({
