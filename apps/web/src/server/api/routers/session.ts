@@ -2,7 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { currentUser } from "@clerk/nextjs/server";
 import { z } from "zod";
 
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const sessionRouter = createTRPCRouter({
   // Create a new session
@@ -136,5 +136,87 @@ export const sessionRouter = createTRPCRouter({
           message: "Failed to get session"
         });
       }
-    })
+    }),
+
+    joinSession: protectedProcedure
+      .input(z.object({
+        sessionId: z.string(),
+        // Later we might add inviteCode: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        try {
+          // Verify the user is authenticated (handled by protectedProcedure)
+          const user = await currentUser();
+
+          if (!user) {
+            throw new TRPCError({
+              code: "UNAUTHORIZED",
+              message: "Not authenticated",
+            });
+          }
+
+          const dbUser = await ctx.db.user.findUnique({
+            where: { clerkId: user.id },
+          });
+
+          if (!dbUser) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "User not found in database",
+            });
+          }
+
+          // Check if the session exists, and whether the current user is active in it
+          const sessionWithUserCheck = await ctx.db.session.findUnique({
+            where: { id: input.sessionId },
+            include: {
+              participants: {
+                where: { userId: dbUser.id },
+              },
+            },
+          });
+
+          if (!sessionWithUserCheck) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Session not found",
+            });
+          }
+
+          if (sessionWithUserCheck.participants.length) {
+            throw new TRPCError({
+              code: "FORBIDDEN",
+              message: "User is already active in session",
+            });
+          }
+
+          // Add the user as a participant
+          await ctx.db.sessionParticipant.create({
+            data: {
+              session: {
+                connect: { id: input.sessionId },
+              },
+              user: {
+                connect: { id: dbUser.id },
+              },
+              status: "ACTIVE",
+            },
+          });
+
+          // Return session data
+          return {
+            sessionId: input.sessionId,
+            sessionURL: `/session/${input.sessionId}`,
+          };
+        } catch (error) {
+          console.error('Error joining session: ', error)
+          if (error instanceof TRPCError) {
+            throw error
+          }
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to join session"
+          })
+        }
+      })
 });

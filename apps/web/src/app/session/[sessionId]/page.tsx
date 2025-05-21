@@ -1,4 +1,5 @@
 import { api } from "~/trpc/server"
+import JoinSessionButton from "~/app/_components/JoinSessionButton"
 
 type Params = Promise<{ sessionId: string }>
 
@@ -40,7 +41,7 @@ export default async function SessionPage({ params }: { params: Params}) {
         </ul>
         <p>Is Solo: {session.isSolo}</p>
         <p>Stage: {session.stage}</p>
-        {/* If you have more session data, display it here */}
+        <JoinSessionButton sessionId={sessionId} />
       </>
     );
   } catch (error) {
